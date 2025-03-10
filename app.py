@@ -9,12 +9,20 @@ from fastapi.middleware.cors import CORSMiddleware
 import io
 
 app = FastAPI()
+
+allowed_origins = [
+    "https://your-frontend.netlify.app",  # If hosted on Netlify
+    "https://your-frontend.vercel.app",   # If hosted on Vercel
+    "https://your-username.github.io",    # If using GitHub Pages
+    "http://localhost:5500",              # If testing locally with Live Server
+    "http://127.0.0.1:5500"
+]
 # Add CORS Middleware (Allow All Origins)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins (set specific origins for security)
+    allow_origins=allowed_origins,  # Allows all origins (set specific origins for security)
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
 

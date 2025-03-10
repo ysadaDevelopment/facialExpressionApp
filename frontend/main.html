@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Facial Expression Recognition</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        video { width: 50%; border: 2px solid black; }
+        canvas { display: none; }
+        #expression { font-size: 24px; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Live Facial Expression Recognition</h1>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+    <p id="expression">Expression: Waiting...</p>
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const expressionText = document.getElementById("expression");
+
+        // Replace this with your actual backend URL on Render
+        const BACKEND_URL = "https://facialexpressionapp.onrender.com";  
+
+        // Access device camera
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                alert("Camera access is required for live prediction.");
+            }
+        }
+
+        // Capture frame and send it to backend
+        async function sendFrame() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas to Base64 image
+            const imageData = canvas.toDataURL("image/jpeg");
+
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: imageData })
+                });
+
+                const result = await response.json();
+                expressionText.innerText = `Expression: ${result.expression}`;
+            } catch (error) {
+                console.error("Error sending frame:", error);
+                expressionText.innerText = "Error detecting expression.";
+            }
+        }
+
+        // Start camera and send frames every second
+        startCamera();
+        setInterval(sendFrame, 1000);
+    </script>
+
+</body>
+</html>
