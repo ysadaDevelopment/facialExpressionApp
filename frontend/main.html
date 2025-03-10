@@ -25,7 +25,7 @@
         const expressionText = document.getElementById("expression");
 
         // Replace this with your actual backend URL on Render
-        const BACKEND_URL = "https://facialexpressionapp.onrender.com";  
+        const BACKEND_URL = "https://facialexpressionapp.onrender.com/predict/";  
 
         // Access device camera
         async function startCamera() {
@@ -42,24 +42,39 @@
         async function sendFrame() {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
+
+            // Debugging: Log canvas dimensions to check
+            console.log(`Canvas size: ${canvas.width} x ${canvas.height}`);
+
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Convert canvas to Base64 image
-            const imageData = canvas.toDataURL("image/jpeg");
+            // Convert canvas to Blob (instead of base64)
+            canvas.toBlob(async function(blob) {
+                // Debugging: Check if blob is valid
+                if (blob) {
+                    console.log("Captured image blob:", blob);
 
-            try {
-                const response = await fetch(BACKEND_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ image: imageData })
-                });
+                    // Create FormData to send the file to the backend
+                    const formData = new FormData();
+                    formData.append("file", blob, "frame.jpg");  // 'frame.jpg' can be any name you like
 
-                const result = await response.json();
-                expressionText.innerText = `Expression: ${result.expression}`;
-            } catch (error) {
-                console.error("Error sending frame:", error);
-                expressionText.innerText = "Error detecting expression.";
-            }
+                    try {
+                        const response = await fetch(BACKEND_URL, {
+                            method: "POST",
+                            body: formData  // Send the FormData with the image
+                        });
+
+                        const result = await response.json();
+                        expressionText.innerText = `Expression: ${result.emotion}`;
+                    } catch (error) {
+                        console.error("Error sending frame:", error);
+                        expressionText.innerText = "Error detecting emotion.";
+                    }
+                } else {
+                    console.error("Failed to capture image blob.");
+                    expressionText.innerText = "Error capturing image.";
+                }
+            }, "image/jpeg");  // Send as jpeg image
         }
 
         // Start camera and send frames every second
