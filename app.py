@@ -11,7 +11,7 @@ import io
 app = FastAPI()
 
 allowed_origins = [
-    "https://your-frontend.netlify.app",  # If hosted on Netlify
+    "https://jazzy-frangipane-2448a0.netlify.app/",  # If hosted on Netlify
     "https://your-frontend.vercel.app",   # If hosted on Vercel
     "https://your-username.github.io",    # If using GitHub Pages
     "http://localhost:5500",              # If testing locally with Live Server
